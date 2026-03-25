@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <h2>Сводка по ученикам класса: {{ school_class.name }}</h2>
+        <table style="width: 100%; text-align: left; margin-top: 15px;">
+            <thead>
+                <tr>
+                    <th style="padding: 10px; border-bottom: 2px solid #ccc;">Фамилия Имя</th>
+                    <th style="padding: 10px; border-bottom: 2px solid #ccc;">Статус альбома</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in status_list %}
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">{{ item.student.last_name }} {{ item.student.first_name }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                        {% if item.is_done %}
+                            <b style="color: green;">✅ Выбрано</b>
+                        {% else %}
+                            <b style="color: red;">❌ Ожидание</b>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <a href="../" class="button">Вернуться назад</a>
+    </div>
+</div>
+{% endblock %}

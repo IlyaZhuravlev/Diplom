@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static "admin/css/forms.css" %}">
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <form enctype="multipart/form-data" action="" method="post" id="bulk_upload_form">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                <div class="form-row">
+                    {{ form.school_class.errors }}
+                    <label class="required" for="id_school_class">{{ form.school_class.label }}:</label>
+                    {{ form.school_class }}
+                </div>
+                <div class="form-row">
+                    {{ form.images.errors }}
+                    <label class="required" for="id_images">{{ form.images.label }}:</label>
+                    {{ form.images }}
+                    <div class="help">Выберите сразу несколько фотографий.</div>
+                </div>
+            </fieldset>
+            <div class="submit-row">
+                <input type="submit" value="Загрузить фотографии" class="default" name="_save">
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+  {{ block.super }}
+  <li>
+    <a href="album-status/" class="historylink" style="background-color: #f5a623; color: white;">Статус готовности альбома</a>
+  </li>
+{% endblock %}
