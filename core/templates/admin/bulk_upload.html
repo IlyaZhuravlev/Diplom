@@ -8,6 +8,16 @@
 
 {% block content %}
 <div id="content-main">
+    {% if is_group_upload %}
+    <div style="background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
+        <strong>📷 Режим загрузки групповых фото:</strong> все загруженные файлы будут сохранены как <b>групповые фото</b> выбранного класса. Имена файлов не имеют значения.
+    </div>
+    {% else %}
+    <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
+        <strong>📸 Режим портретов:</strong> система попытается сопоставить имя файла с учениками класса. Файлы без совпадения станут <b>общими/групповыми</b> фото.
+    </div>
+    {% endif %}
+
     <form enctype="multipart/form-data" action="" method="post" id="bulk_upload_form">
         {% csrf_token %}
         <div>
@@ -25,7 +35,7 @@
                 </div>
             </fieldset>
             <div class="submit-row">
-                <input type="submit" value="Загрузить фотографии" class="default" name="_save">
+                <input type="submit" value="{% if is_group_upload %}Загрузить групповые фото{% else %}Загрузить фотографии{% endif %}" class="default" name="_save">
             </div>
         </div>
     </form>

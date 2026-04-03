@@ -26,23 +26,35 @@ export default function GalleryPage() {
 
     const fetchData = async () => {
       try {
-        const queryParams = studentId === 'null' 
-          ? `?class_id=${classId}&student_id=null` 
-          : `?student_id=${studentId}`;
-          
-        const [photosRes, classRes] = await Promise.all([
-          api.get(`/photos/${queryParams}`),
-          api.get(`/classes/${classId}/`)
-        ]);
-        
+        const classRes = await api.get(`/classes/${classId}/`);
         setClassInfo(classRes.data);
-        const allPhotos = photosRes.data.results || photosRes.data;
-        
-        if (studentId === 'null') {
-           setPhotos(allPhotos);
+
+        if (studentId === 'teacher') {
+          // Показываем фото учителя из данных класса
+          const teacherPhotoUrl = classRes.data.teacher_photo;
+          if (teacherPhotoUrl) {
+            setPhotos([{
+              id: 'teacher',
+              image: teacherPhotoUrl,
+              photo_type: 'portrait',
+              student: null,
+            }]);
+          } else {
+            setPhotos([]);
+          }
         } else {
-           const myPhotos = allPhotos.filter(p => p.school_class === parseInt(classId));
-           setPhotos(myPhotos);
+          const queryParams = studentId === 'null' 
+            ? `?class_id=${classId}&student_id=null` 
+            : `?student_id=${studentId}`;
+          const photosRes = await api.get(`/photos/${queryParams}`);
+          const allPhotos = photosRes.data.results || photosRes.data;
+          
+          if (studentId === 'null') {
+             setPhotos(allPhotos);
+          } else {
+             const myPhotos = allPhotos.filter(p => p.school_class === parseInt(classId));
+             setPhotos(myPhotos);
+          }
         }
       } catch (err) {
         console.error("Fetch error:", err);
@@ -56,7 +68,7 @@ export default function GalleryPage() {
 
   const toggleSelect = (id) => {
     const studentId = localStorage.getItem('studentId');
-    if (studentId === 'null') return; // Cannot select common photos
+    if (studentId === 'null' || studentId === 'teacher') return;
     
     if (selectedCards.includes(id)) {
       setSelectedCards([]);
@@ -137,7 +149,12 @@ export default function GalleryPage() {
                 Класс: <span className="text-[#8B5E3C] font-semibold">{classInfo.name}</span> <span className="text-[#d6cfc5] mx-2 font-sans font-light">/</span> Выпуск {classInfo.graduation_year}
               </p>
             )}
-            {localStorage.getItem('studentId') !== 'null' && (
+            {localStorage.getItem('studentId') === 'teacher' && (
+              <p className="text-[#D4AF37] font-sans font-bold text-sm tracking-wide mt-2">
+                Фото классного руководителя
+              </p>
+            )}
+            {localStorage.getItem('studentId') !== 'null' && localStorage.getItem('studentId') !== 'teacher' && (
               <p className="text-[#D4AF37] font-sans font-bold text-sm tracking-wide mt-2">
                 Выберите 1 лучшее фото для главного разворота альбома
               </p>
@@ -145,7 +162,7 @@ export default function GalleryPage() {
           </div>
         </div>
         
-        {localStorage.getItem('studentId') !== 'null' && (
+        {localStorage.getItem('studentId') !== 'null' && localStorage.getItem('studentId') !== 'teacher' && (
           <div className="flex flex-col sm:flex-row items-center gap-6 bg-white py-5 px-6 md:px-8 rounded-[2rem] shadow-xl shadow-[#8B5E3C]/5 border border-[#eae0d5]">
             <div className="text-center sm:text-right">
               <p className="text-[#8c8c8c] text-[0.65rem] uppercase tracking-[0.2em] font-bold mb-1">Выбранный Портрет</p>
@@ -194,10 +211,10 @@ export default function GalleryPage() {
                     alt="Снимок выпускника" 
                     className="w-full h-auto object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.03]"
                   />
-                  {localStorage.getItem('studentId') !== 'null' && isSelected && (
+                  {localStorage.getItem('studentId') !== 'null' && localStorage.getItem('studentId') !== 'teacher' && isSelected && (
                     <div className="absolute inset-0 bg-[#D4AF37]/5 transition-colors duration-300 pointer-events-none"></div>
                   )}
-                  {localStorage.getItem('studentId') !== 'null' && (
+                  {localStorage.getItem('studentId') !== 'null' && localStorage.getItem('studentId') !== 'teacher' && (
                     <div className="absolute top-5 right-5 z-10">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-md ${
                         isSelected 

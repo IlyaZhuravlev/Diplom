@@ -5,6 +5,7 @@ import api from '../api';
 export default function StudentSelectPage() {
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
+  const [classInfo, setClassInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,20 +15,24 @@ export default function StudentSelectPage() {
       return;
     }
 
-    const fetchStudents = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get(`/students/?class_id=${classId}`);
-        const data = res.data.results || res.data;
+        const [studentsRes, classRes] = await Promise.all([
+          api.get(`/students/?class_id=${classId}`),
+          api.get(`/classes/${classId}/`),
+        ]);
+        const data = studentsRes.data.results || studentsRes.data;
         data.sort((a, b) => a.last_name.localeCompare(b.last_name));
         setStudents(data);
+        setClassInfo(classRes.data);
       } catch (err) {
-        console.error("Student fetch error:", err);
+        console.error("Fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStudents();
+    fetchData();
   }, [navigate]);
 
   const handleSelect = (studentId) => {
@@ -61,37 +66,35 @@ export default function StudentSelectPage() {
         </p>
       </div>
         
-      {students.length === 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 gap-y-10 w-full px-4 md:px-0 mt-6">
-          <div className="relative group cursor-pointer" onClick={() => handleSelect('null')}>
-            <div className="w-1/2 h-8 bg-[#8B5E3C] border border-b-0 border-[#8B5E3C] rounded-t-2xl transition-all duration-300 absolute -top-7 left-2 z-0 group-hover:bg-[#734c30]"></div>
-            <div className="px-8 py-8 rounded-[2rem] rounded-tl-none bg-white border-2 border-[#8B5E3C] group-hover:shadow-[0_0_30px_rgba(139,94,60,0.2)] transition-all duration-300 text-[#2d2d2d] group-hover:-translate-y-2 flex flex-col justify-center items-center h-44 relative z-10 overflow-hidden shadow-sm">
-                <div className="absolute inset-0 bg-[#8B5E3C]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <span className="font-bold text-2xl font-serif text-[#2d2d2d] mb-2 tracking-wide relative z-10 transition-colors group-hover:text-[#8B5E3C]">
-                  ОБЩИЕ
-                </span>
-                <span className="text-base font-bold text-[#8B5E3C] transition-colors relative z-10 tracking-widest uppercase">
-                  ФОТО КЛАССА
-                </span>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 gap-y-10 w-full px-4 md:px-0 mt-6">
+        
+        {/* TEACHER FOLDER */}
+        <div className="relative group cursor-pointer" onClick={() => handleSelect('teacher')}>
+          <div className="w-1/2 h-8 bg-[#D4AF37] border border-b-0 border-[#D4AF37] rounded-t-2xl transition-all duration-300 absolute -top-7 left-2 z-0 group-hover:bg-[#b8962e]"></div>
+          <div className="px-8 py-8 rounded-[2rem] rounded-tl-none bg-white border-2 border-[#D4AF37] group-hover:shadow-[0_0_30px_rgba(212,175,55,0.25)] transition-all duration-300 text-[#2d2d2d] group-hover:-translate-y-2 flex flex-col justify-center items-center h-44 relative z-10 overflow-hidden shadow-md">
+              <div className="absolute inset-0 bg-[#D4AF37]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <span className="font-bold text-2xl font-serif text-[#2d2d2d] mb-2 tracking-wide relative z-10 transition-colors group-hover:text-[#D4AF37]">
+                {classInfo?.teacher_name?.split(' ')[0] || 'УЧИТЕЛЬ'}
+              </span>
+              <span className="text-base font-bold text-[#D4AF37] transition-colors relative z-10 tracking-widest uppercase">
+                Кл. руководитель
+              </span>
           </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 gap-y-10 w-full px-4 md:px-0 mt-6">
-          
-          {/* COMMON FOLDER */}
-          <div className="relative group cursor-pointer" onClick={() => handleSelect('null')}>
-            <div className="w-1/2 h-8 bg-[#8B5E3C] border border-b-0 border-[#8B5E3C] rounded-t-2xl transition-all duration-300 absolute -top-7 left-2 z-0 group-hover:bg-[#734c30]"></div>
-            <div className="px-8 py-8 rounded-[2rem] rounded-tl-none bg-white border-2 border-[#8B5E3C] group-hover:shadow-[0_0_30px_rgba(139,94,60,0.2)] transition-all duration-300 text-[#2d2d2d] group-hover:-translate-y-2 flex flex-col justify-center items-center h-44 relative z-10 overflow-hidden shadow-md">
-                <div className="absolute inset-0 bg-[#8B5E3C]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <span className="font-bold text-2xl font-serif text-[#2d2d2d] mb-2 tracking-wide relative z-10 transition-colors group-hover:text-[#8B5E3C]">
-                  ОБЩИЕ
-                </span>
-                <span className="text-base font-bold text-[#8B5E3C] transition-colors relative z-10 tracking-widest uppercase">
-                  ФОТО КЛАССА
-                </span>
-            </div>
+
+        {/* COMMON FOLDER */}
+        <div className="relative group cursor-pointer" onClick={() => handleSelect('null')}>
+          <div className="w-1/2 h-8 bg-[#8B5E3C] border border-b-0 border-[#8B5E3C] rounded-t-2xl transition-all duration-300 absolute -top-7 left-2 z-0 group-hover:bg-[#734c30]"></div>
+          <div className="px-8 py-8 rounded-[2rem] rounded-tl-none bg-white border-2 border-[#8B5E3C] group-hover:shadow-[0_0_30px_rgba(139,94,60,0.2)] transition-all duration-300 text-[#2d2d2d] group-hover:-translate-y-2 flex flex-col justify-center items-center h-44 relative z-10 overflow-hidden shadow-md">
+              <div className="absolute inset-0 bg-[#8B5E3C]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <span className="font-bold text-2xl font-serif text-[#2d2d2d] mb-2 tracking-wide relative z-10 transition-colors group-hover:text-[#8B5E3C]">
+                ОБЩИЕ
+              </span>
+              <span className="text-base font-bold text-[#8B5E3C] transition-colors relative z-10 tracking-widest uppercase">
+                ФОТО КЛАССА
+              </span>
           </div>
+        </div>
 
           {/* STUDENT FOLDERS */}
           {students.map((student) => (
@@ -109,7 +112,6 @@ export default function StudentSelectPage() {
             </div>
           ))}
         </div>
-      )}
       
       <button 
         onClick={() => {

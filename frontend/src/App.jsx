@@ -4,6 +4,8 @@ import LoginPage from './pages/LoginPage';
 import GalleryPage from './pages/GalleryPage';
 import SchedulePage from './pages/SchedulePage';
 import StudentSelectPage from './pages/StudentSelectPage';
+import PhotographerPage from './pages/PhotographerPage';
+import AlbumEditorPage from './pages/AlbumEditorPage';
 
 function Header() {
   return (
@@ -25,6 +27,8 @@ function App() {
             <Route path="/select-student" element={<StudentSelectPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/photographer" element={<PhotographerPage />} />
+            <Route path="/album-editor" element={<AlbumEditorPage />} />
           </Routes>
         </main>
       </div>
