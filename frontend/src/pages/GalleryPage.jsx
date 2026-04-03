@@ -45,14 +45,17 @@ export default function GalleryPage() {
         } else {
           const queryParams = studentId === 'null' 
             ? `?class_id=${classId}&student_id=null` 
-            : `?student_id=${studentId}`;
+            : `?student_id=${studentId}&photo_type=portrait`;
           const photosRes = await api.get(`/photos/${queryParams}`);
           const allPhotos = photosRes.data.results || photosRes.data;
           
           if (studentId === 'null') {
              setPhotos(allPhotos);
           } else {
-             const myPhotos = allPhotos.filter(p => p.school_class === parseInt(classId));
+             // Строго только портреты текущего класса
+             const myPhotos = allPhotos.filter(
+               p => p.school_class === parseInt(classId) && p.photo_type === 'portrait'
+             );
              setPhotos(myPhotos);
           }
         }

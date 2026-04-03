@@ -1,0 +1,14 @@
+/* Фикс границ полей */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple,
+select.form-control,
+input.form-control,
+.select2-selection {
+    border: 1px solid #7a7a7a !important;
+    background-color: #ffffff !important;
+    min-height: 38px !important;
+}
+/* Скрываем все иконки (плюс, карандаш, глаз) */
+.related-widget-wrapper-link {
+    display: none !important;
+}

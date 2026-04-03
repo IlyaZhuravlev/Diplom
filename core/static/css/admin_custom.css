@@ -1,0 +1,32 @@
+.submit-row a.button, .submit-row button, .submit-row input[type=button], .submit-row input[type=submit] {
+    white-space: normal !important;
+    height: auto !important;
+    padding: 8px 15px !important;
+    line-height: 1.2 !important;
+}
+.object-tools .btn { margin-bottom: 5px; }
+
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple,
+select, 
+textarea,
+input[type="text"], 
+input[type="password"], 
+input[type="email"], 
+input[type="number"], 
+input[type="search"], 
+input[type="url"], 
+input[type="tel"],
+input.form-control {
+    border: 1px solid #ced4da !important;
+    background-color: #ffffff !important;
+    min-height: 38px;
+    border-radius: 4px;
+    padding-left: 8px;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+}

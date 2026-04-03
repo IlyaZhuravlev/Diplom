@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 
 const API_BASE = 'http://127.0.0.1:8000';
@@ -22,8 +22,10 @@ const HANDLE_SIZE = 8;
 const MIN_ZONE_SIZE = 20;
 
 export default function AlbumEditorPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get('template_id');
+  const orderId = searchParams.get('order_id');
 
   // Data state
   const [template, setTemplate] = useState(null);
@@ -31,6 +33,10 @@ export default function AlbumEditorPage() {
   const [activeSpreadIdx, setActiveSpreadIdx] = useState(0);
   const [zones, setZones] = useState([]);
   const [selectedZoneIdx, setSelectedZoneIdx] = useState(-1);
+
+  // Order mode state
+  const [order, setOrder] = useState(null);
+  const [groupPhotos, setGroupPhotos] = useState([]);
 
   // Upload state
   const [uploadSpreadType, setUploadSpreadType] = useState('cover');
@@ -73,6 +79,27 @@ export default function AlbumEditorPage() {
     };
     load();
   }, [templateId]);
+
+  // ── Load order data (if in order mode) ──
+  useEffect(() => {
+    if (!orderId) return;
+    const loadOrderData = async () => {
+      try {
+        const orderRes = await api.get(`/album-orders/${orderId}/`);
+        setOrder(orderRes.data);
+        const classId = typeof orderRes.data.school_class === 'object' 
+                          ? orderRes.data.school_class.id 
+                          : orderRes.data.school_class;
+        if (classId) {
+          const photosRes = await api.get(`/photos/?class_id=${classId}&photo_type=group`);
+          setGroupPhotos(photosRes.data.results || photosRes.data);
+        }
+      } catch (e) {
+        console.error('Ошибка загрузки данных заказа:', e);
+      }
+    };
+    loadOrderData();
+  }, [orderId]);
 
   // ── Switch active spread ──
   useEffect(() => {
@@ -347,6 +374,27 @@ export default function AlbumEditorPage() {
     setZones(newZones);
   };
 
+  // ── Assign group photo to zone ──
+  const handleAssignGroupPhoto = async (photoId) => {
+    if (!selectedZone || !selectedZone.id || !order) return;
+    
+    const newAssignments = {
+      ...(order.zone_assignments || {}),
+      [selectedZone.id]: photoId
+    };
+    
+    try {
+      const res = await api.patch(`/album-orders/${order.id}/`, {
+        zone_assignments: newAssignments
+      });
+      setOrder(res.data);
+      setMessage({ text: 'Фотография привязана к зоне', type: 'success' });
+    } catch (e) {
+      console.error('Ошибка привязки фото:', e);
+      setMessage({ text: 'Ошибка привязки фотографии', type: 'error' });
+    }
+  };
+
   // ── Save zones to backend ──
   const handleSaveZones = async () => {
     const spread = spreads[activeSpreadIdx];
@@ -504,14 +552,27 @@ export default function AlbumEditorPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto">
+    <div className="max-w-[1400px] mx-auto relative pt-4">
       {/* Header */}
       <div className="text-center mb-6">
-        <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#2d2d2d] mb-2">
+        <div className="flex justify-between items-center mb-2 px-4">
+          <button 
+            onClick={() => navigate('/photographer')}
+            className="flex items-center gap-2 text-[#8B5E3C] hover:text-[#734c30] text-sm font-bold bg-[#FDFBF7] px-4 py-2 rounded-xl border border-[#eae0d5] hover:bg-[#f5f0ea] transition-all"
+          >
+            ← Назад к панели фотографа
+          </button>
+          {order && (
+            <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">
+              Сборка заказа #{order.id}
+            </span>
+          )}
+        </div>
+        <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#2d2d2d] mb-2 mt-4">
           Редактор альбома
         </h2>
         <p className="text-[#8c8c8c] text-sm tracking-wide">
-          {template ? template.name : 'Загрузка...'} · Визуальная разметка зон
+          {template ? template.name : 'Загрузка...'} · {order ? 'Привязка фотографий' : 'Визуальная разметка зон'}
         </p>
       </div>
 
@@ -722,6 +783,46 @@ export default function AlbumEditorPage() {
                 {selectedZone.id && (
                   <div className="text-[10px] text-[#ccc] mt-1">
                     ID: {selectedZone.id}
+                  </div>
+                )}
+                
+                {/* Group Photo Selection (Order Mode) */}
+                {order && selectedZone.zone_type === 'group' && (
+                  <div className="mt-4 pt-4 border-t border-[#eae0d5]">
+                    <h4 className="text-[10px] uppercase tracking-widest font-bold text-[#8B5E3C] mb-2">
+                      Привязка группового фото
+                    </h4>
+                    {groupPhotos.length === 0 ? (
+                      <p className="text-xs text-[#8c8c8c]">Нет групповых фото в классе</p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                        {groupPhotos.map(photo => {
+                          const isAssigned = (order.zone_assignments || {})[selectedZone.id] === photo.id;
+                          return (
+                            <div 
+                              key={photo.id}
+                              onClick={() => handleAssignGroupPhoto(photo.id)}
+                              className={`relative rounded-lg overflow-hidden cursor-pointer border-2 transition-all group ${
+                                isAssigned ? 'border-[#8B5E3C]' : 'border-transparent hover:border-[#8B5E3C]/50'
+                              }`}
+                            >
+                              <img 
+                                src={photo.image.startsWith('http') ? photo.image : `${API_BASE}${photo.image}`} 
+                                className="w-full h-16 object-cover" 
+                                alt=""
+                              />
+                              {isAssigned && (
+                                <div className="absolute inset-0 bg-[#8B5E3C]/20 flex items-center justify-center">
+                                  <span className="bg-[#8B5E3C] text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold">
+                                    Выбрано
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -109,8 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'Asia/Yekaterinburg'
 USE_I18N = True
 
 USE_TZ = True
@@ -120,6 +119,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -133,26 +135,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 JAZZMIN_SETTINGS = {
     # Заголовки
-    "site_title": "Фотостудия",
-    "site_header": "Фотостудия — Админ",
-    "site_brand": "Фотостудия",
+    "site_title": "Студия Журавлик",
+    "site_header": "Журавлик",
+    "site_brand": "Студия Журавлик",
     "welcome_sign": "Добро пожаловать в панель управления",
 
     # Поиск по моделям в шапке
-    "search_model": ["core.Student", "core.SchoolClass"],
+    "search_model": ["core.Student", "core.SchoolClass", "core.AlbumOrder"],
 
     # Верхнее меню
-    "topmenu_links": [
-        {"name": "Главная", "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "Массовая загрузка", "url": "admin:bulk_upload"},
-    ],
+    "topmenu_links": [],
 
     # ── Логическая группировка моделей в сайдбаре ──
     "custom_links": {
         "core": [{
-            "name": "Массовая загрузка фото",
+            "name": "Портреты",
             "url": "admin:bulk_upload",
             "icon": "fas fa-upload",
+        },
+        {
+            "name": "Групповые",
+            "url": "admin:group_upload",
+            "icon": "fas fa-users",
         }],
     },
 
@@ -167,6 +171,10 @@ JAZZMIN_SETTINGS = {
         "core.Photo": "fas fa-camera-retro",
         "core.PhotoSelection": "fas fa-check-square",
         "core.Shoot": "fas fa-calendar-alt",
+        "core.AlbumTemplate": "fas fa-book-open",
+        "core.TemplateSpread": "fas fa-file-image",
+        "core.TemplateZone": "fas fa-vector-square",
+        "core.AlbumOrder": "fas fa-shopping-cart",
     },
     "default_icon_parents": "fas fa-folder-open",
     "default_icon_children": "fas fa-angle-right",
@@ -174,6 +182,7 @@ JAZZMIN_SETTINGS = {
     # UI tweaks
     "show_sidebar": True,
     "navigation_expanded": True,
+    "show_ui_builder": False,
     "order_with_respect_to": [
         "auth",
         "core",
@@ -183,42 +192,33 @@ JAZZMIN_SETTINGS = {
         "core.Photo",
         "core.PhotoSelection",
         "core.Shoot",
+        "core.AlbumTemplate",
+        "core.TemplateSpread",
+        "core.TemplateZone",
+        "core.AlbumOrder",
     ],
 
     # Тема
-    "custom_css": None,
+    "custom_css": "css/admin_custom.css",
     "custom_js": None,
     "use_google_fonts_cdn": True,
     "changeform_format": "horizontal_tabs",
 }
 
 JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-light",
-    "accent": "accent-primary",
-    "navbar": "navbar-light",
-    "no_navbar_border": False,
-    "navbar_fixed": True,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_fixed": True,
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": True,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
+    "navbar": "navbar-dark navbar-primary",
     "theme": "flatly",
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": True,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": True,
     "button_classes": {
         "primary": "btn-primary",
-        "secondary": "btn-outline-secondary",
+        "secondary": "btn-secondary",
         "info": "btn-info",
         "warning": "btn-warning",
         "danger": "btn-danger",
-        "success": "btn-success",
-    },
+        "success": "btn-success"
+    }
 }

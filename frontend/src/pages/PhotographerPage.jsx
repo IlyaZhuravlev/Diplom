@@ -131,7 +131,7 @@ export default function PhotographerPage() {
   const handleOpenEditor = () => {
     if (!currentOrder?.template) return;
     const tid = typeof currentOrder.template === 'object' ? currentOrder.template.id : currentOrder.template;
-    navigate(`/album-editor?template_id=${tid}`);
+    navigate(`/album-editor?template_id=${tid}&order_id=${currentOrder.id}`);
   };
 
   const statusInfo = currentOrder ? STATUS_MAP[currentOrder.status] || STATUS_MAP.draft : null;

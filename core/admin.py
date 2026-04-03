@@ -72,6 +72,19 @@ class SchoolClassAdmin(admin.ModelAdmin):
     autocomplete_fields = ('school',)
     ordering = ('school', 'name')
 
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('school', 'name', 'graduation_year')
+        }),
+        ('Информация о руководителе', {
+            'fields': ('teacher_name', 'teacher_photo')
+        }),
+        ('Доступ для родителей', {
+            'fields': ('parent_password',),
+            'description': 'Пароль, который родители будут использовать для входа и выбора фотографий.'
+        }),
+    )
+
     @admin.display(description='Учеников')
     def student_count(self, obj):
         return obj.students.count()
@@ -206,16 +219,34 @@ class SchoolClassAdmin(admin.ModelAdmin):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     form = StudentForm
-    list_display = ('last_name', 'first_name', 'get_school', 'school_class')
+    list_display = ('last_name', 'first_name', 'get_school', 'school_class', 'has_portrait')
     list_filter = ('school_class__school', 'school_class')
     search_fields = ('last_name', 'first_name')
     autocomplete_fields = ('school_class',)
     ordering = ('last_name', 'first_name')
     list_per_page = 30
 
+    fieldsets = (
+        ('Личные данные', {
+            'fields': ('last_name', 'first_name')
+        }),
+        ('Учеба', {
+            'fields': ('school_class',)
+        }),
+        ('Массовая загрузка', {
+            'fields': ('bulk_photos',),
+            'classes': ('collapse',),
+            'description': 'Здесь можно быстро загрузить несколько портретов для этого ученика.'
+        }),
+    )
+
     @admin.display(description='Школа', ordering='school_class__school__name')
     def get_school(self, obj):
         return obj.school_class.school if obj.school_class else '—'
+
+    @admin.display(description='Есть портрет?', boolean=True)
+    def has_portrait(self, obj):
+        return Photo.objects.filter(student=obj, photo_type='portrait').exists()
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -245,9 +276,19 @@ class StudentAdmin(admin.ModelAdmin):
 class PhotoAdmin(admin.ModelAdmin):
     list_display = ('id', 'photo_type', 'student', 'school_class', 'image_preview')
     list_filter = ('student__school_class__school', 'student__school_class', 'photo_type')
-    search_fields = ('student__last_name', 'student__first_name')
+    search_fields = ('student__last_name', 'student__first_name', 'school_class__name')
     autocomplete_fields = ('student', 'school_class')
     list_per_page = 30
+
+    fieldsets = (
+        ('Тип и изображение', {
+            'fields': ('photo_type', 'image')
+        }),
+        ('Привязка', {
+            'fields': ('school_class', 'student'),
+            'description': 'Групповые фото привязываются только к Классу. Портреты — к Классу и Ученику.'
+        }),
+    )
 
     @admin.display(description='Превью')
     def image_preview(self, obj):

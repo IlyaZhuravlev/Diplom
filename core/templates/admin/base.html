@@ -1,0 +1,21 @@
+{% extends "admin/base.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Жесткий фикс для полей */
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple,
+    select.form-control,
+    input.form-control,
+    .select2-selection {
+        border: 1px solid #7a7a7a !important; /* Четкая серая рамка */
+        background-color: #ffffff !important;
+    }
+    
+    /* Скрываем вообще ВСЕ иконки у связанных полей (карандаш, глаз, плюс) */
+    .related-widget-wrapper-link {
+        display: none !important;
+    }
+</style>
+{% endblock %}
